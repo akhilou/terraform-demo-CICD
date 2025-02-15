@@ -109,6 +109,12 @@ resource "aws_security_group" "web_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     from_port   = 22
@@ -140,7 +146,7 @@ resource "aws_instance" "web" {
               yum install -y nginx
               systemctl start nginx
               systemctl enable nginx
-              echo "<html><body><h1>Hello from Nginx on AWS!</h1></body></html>" > /usr/share/nginx/html/index.html
+              sudo sed -i 's/<h1>Welcome to nginx!<\/h1>/<h1>Welcome to Terraform<\/h1>/' /var/www/html/index.nginx-debian.html
               EOF
   tags = {
     Name = "web_instance"
