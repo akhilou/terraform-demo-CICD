@@ -134,6 +134,14 @@ resource "aws_instance" "web" {
   subnet_id            = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install -y nginx
+              systemctl start nginx
+              systemctl enable nginx
+              echo "<html><body><h1>Hello from Nginx on AWS!</h1></body></html>" > /usr/share/nginx/html/index.html
+              EOF
   tags = {
     Name = "web_instance"
   }
@@ -145,14 +153,6 @@ resource "aws_lb" "alb" {
   security_groups    = [aws_security_group.web_sg.id]
   subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
 
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              yum install -y nginx
-              systemctl start nginx
-              systemctl enable nginx
-              echo "<html><body><h1>Hello from Nginx on AWS!</h1></body></html>" > /usr/share/nginx/html/index.html
-              EOF
   tags = {
     Name = "app-lb"
   }
