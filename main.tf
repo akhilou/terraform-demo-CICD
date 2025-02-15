@@ -142,11 +142,11 @@ resource "aws_instance" "web" {
 
   user_data = <<-EOF
               #!/bin/bash
-              yum update -y
-              yum install -y nginx
+              apt update -y
+              apt install -y nginx
+              sudo sed -i 's/<h1>Welcome to nginx!<\/h1>/<h1>Welcome to Terraform<\/h1>/' /var/www/html/index.nginx-debian.html
               systemctl start nginx
               systemctl enable nginx
-              sudo sed -i 's/<h1>Welcome to nginx!<\/h1>/<h1>Welcome to Terraform<\/h1>/' /var/www/html/index.nginx-debian.html
               EOF
   tags = {
     Name = "web_instance"
