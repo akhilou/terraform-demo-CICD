@@ -29,6 +29,16 @@ variable "instance_type" {
 variable "ami" {
   default = "ami-00bb6a80f01f03502"  
 }
+variable "domain_name" {
+  description = "cloudwithsunil.xyz"
+  default     = "cloudwithsunil.xyz"
+}
+
+variable "subdomain_name" {
+  description = "www.cloudwithsunil.xyz"
+  default     = "www.cloudwithsunil.xyz"
+}
+
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
 
@@ -180,4 +190,19 @@ resource "aws_lb_target_group_attachment" "web_instance" {
   target_id        = aws_instance.web.id
   port             = 80
 }
+resource "aws_route53_record" "app_record" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.subdomain_name
+  type    = "A"
+  alias {
+    name                   = aws_lb.alb.dns_name
+    zone_id                = aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
+}
+
+data "aws_route53_zone" "main" {
+  name = var.domain_name
+}
+
 
