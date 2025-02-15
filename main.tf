@@ -38,6 +38,10 @@ variable "subdomain_name" {
   description = "www.cloudwithsunil.xyz"
   default     = "www.cloudwithsunil.xyz"
 }
+variable "certificate_arn" {
+  description = "ARN of the ACM certificate for HTTPS listener"
+  default     = "arn:aws:acm:ap-south-1:007903962438:certificate/cc05b44c-fd8c-4a34-ab2f-8ff966dccac4"
+}
 
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
@@ -187,6 +191,7 @@ resource "aws_lb_listener" "listener1" {
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
+  certificate_arn   = var.certificate_arn
 
   default_action {
     type             = "forward"
