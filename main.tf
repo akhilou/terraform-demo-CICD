@@ -183,7 +183,7 @@ resource "aws_lb_listener" "listener" {
     target_group_arn = aws_lb_target_group.tg.arn
   }
 }
-resource "aws_lb_listener" "listener" {
+resource "aws_lb_listener" "listener1" {
   load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
