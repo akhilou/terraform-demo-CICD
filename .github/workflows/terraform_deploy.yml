@@ -1,4 +1,4 @@
-name: Terraform
+name: AWS-Infra deploy
 
 on:
   workflow_dispatch:
