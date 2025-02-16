@@ -1,14 +1,14 @@
 provider "aws" {
   region = "ap-south-1"
 }
+
 terraform {
   backend "s3" {
-    bucket         = "my-terraform-state-bucket-sunil7756"
-    key            = "terraform/terraform.tfstate"
-    region         = "ap-south-1"
+    bucket = "my-terraform-state-bucket-sunil7756"
+    key    = "terraform/terraform.tfstate"
+    region = "ap-south-1"
   }
 }
-
 
 variable "vpc_cidr" {
   default = "10.0.0.0/16"
@@ -27,8 +27,9 @@ variable "instance_type" {
 }
 
 variable "ami" {
-  default = "ami-00bb6a80f01f03502"  
+  default = "ami-00bb6a80f01f03502"
 }
+
 variable "domain_name" {
   description = "cloudwithsunil.xyz"
   default     = "cloudwithsunil.xyz"
@@ -38,185 +39,53 @@ variable "subdomain_name" {
   description = "www.cloudwithsunil.xyz"
   default     = "www.cloudwithsunil.xyz"
 }
+
 variable "certificate_arn" {
   description = "ARN of the ACM certificate for HTTPS listener"
   default     = "arn:aws:acm:ap-south-1:007903962438:certificate/cc05b44c-fd8c-4a34-ab2f-8ff966dccac4"
 }
 
-resource "aws_vpc" "main" {
-  cidr_block = var.vpc_cidr
-
-  tags = {
-    Name = "main_vpc"
-  }
+module "vpc" {
+  source    = "./modules/vpc"
+  vpc_cidr  = var.vpc_cidr
 }
 
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "main_igw"
-  }
+module "subnets" {
+  source          = "./modules/subnets"
+  vpc_id          = module.vpc.vpc_id
+  route_table_id  = module.vpc.route_table_id
+  subnet_cidr1    = var.subnet_cidr1
+  subnet_cidr2    = var.subnet_cidr2
+  availability_zone1 = "ap-south-1a"
+  availability_zone2 = "ap-south-1b"
 }
 
-resource "aws_subnet" "subnet1" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnet_cidr1
-  availability_zone = "ap-south-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "subnet1"
-  }
+module "security_groups" {
+  source = "./modules/security_groups"
+  vpc_id = module.vpc.vpc_id
 }
 
-resource "aws_subnet" "subnet2" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.subnet_cidr2
-  availability_zone = "ap-south-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "subnet2"
-  }
+module "ec2" {
+  source        = "./modules/ec2"
+  ami           = var.ami
+  instance_type = var.instance_type
+  subnet_id     = module.subnets.subnet1_id
+  web_sg_id     = module.security_groups.web_sg_id
 }
 
-resource "aws_route_table" "main" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "main_rt"
-  }
+module "alb" {
+  source          = "./modules/alb"
+  vpc_id          = module.vpc.vpc_id
+  subnet1_id      = module.subnets.subnet1_id
+  subnet2_id      = module.subnets.subnet2_id
+  alb_sg_id       = module.security_groups.web_sg_id
+  certificate_arn = var.certificate_arn
 }
 
-resource "aws_route_table_association" "subnet1" {
-  subnet_id      = aws_subnet.subnet1.id
-  route_table_id = aws_route_table.main.id
+module "route53" {
+  source          = "./modules/route53"
+  domain_name     = var.domain_name
+  subdomain_name  = var.subdomain_name
+  alb_dns_name    = module.alb.alb_dns_name
+  alb_zone_id     = data.aws_route53_zone.main.zone_id
 }
-
-resource "aws_route_table_association" "subnet2" {
-  subnet_id      = aws_subnet.subnet2.id
-  route_table_id = aws_route_table.main.id
-}
-
-resource "aws_security_group" "web_sg" {
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "web_sg"
-  }
-}
-
-resource "aws_instance" "web" {
-  ami                  = var.ami
-  instance_type        = var.instance_type
-  subnet_id            = aws_subnet.subnet1.id
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-
-  user_data = <<-EOF
-              #!/bin/bash
-              apt update -y
-              apt install -y nginx
-              sudo sed -i 's/<h1>Welcome to nginx!<\/h1>/<h1>Welcome to Terraform<\/h1>/' /var/www/html/index.nginx-debian.html
-              systemctl start nginx
-              systemctl enable nginx
-              EOF
-  tags = {
-    Name = "web_instance"
-  }
-}
-resource "aws_lb" "alb" {
-  name               = "app-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.web_sg.id]
-  subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
-
-  tags = {
-    Name = "app-lb"
-  }
-}
-
-resource "aws_lb_target_group" "tg" {
-  name     = "app-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
-
-}
-
-resource "aws_lb_listener" "listener" {
-  load_balancer_arn = aws_lb.alb.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg.arn
-  }
-}
-resource "aws_lb_listener" "listener1" {
-  load_balancer_arn = aws_lb.alb.arn
-  port              = 443
-  protocol          = "HTTPS"
-  certificate_arn   = var.certificate_arn
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg.arn
-  }
-}
-
-resource "aws_lb_target_group_attachment" "web_instance" {
-  target_group_arn = aws_lb_target_group.tg.arn
-  target_id        = aws_instance.web.id
-  port             = 80
-}
-resource "aws_route53_record" "app_record" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = var.subdomain_name
-  type    = "A"
-  alias {
-    name                   = aws_lb.alb.dns_name
-    zone_id                = aws_lb.alb.zone_id
-    evaluate_target_health = true
-  }
-}
-
-data "aws_route53_zone" "main" {
-  name = var.domain_name
-}
-
-
