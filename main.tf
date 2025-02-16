@@ -50,9 +50,9 @@ module "alb" {
 }
 
 module "route53" {
-  source          = "./modules/route53"
-  domain_name     = var.domain_name
-  subdomain_name  = var.subdomain_name
-  alb_dns_name    = module.alb.alb_dns_name
-  alb_zone_id     = data.aws_route53_zone.main.zone_id
+  source              = "./modules/route53"
+  domain_name         = var.domain_name
+  subdomain_name      = var.subdomain_name
+  alb_dns_name        = module.alb.alb_dns_name
+  alb_hosted_zone_id  = module.alb.alb_hosted_zone_id
 }
