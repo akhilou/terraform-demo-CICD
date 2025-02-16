@@ -9,9 +9,18 @@ terraform {
     region = "ap-south-1"
   }
 }
+
+
+
+variable "certificate_arn" {
+  description = "ARN of the ACM certificate for HTTPS listener"
+  default     = "arn:aws:acm:ap-south-1:007903962438:certificate/cc05b44c-fd8c-4a34-ab2f-8ff966dccac4"
+}
+
 data "aws_route53_zone" "main" {
   name = var.domain_name
 }
+
 module "vpc" {
   source    = "./modules/vpc"
   vpc_cidr  = var.vpc_cidr
