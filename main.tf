@@ -9,6 +9,9 @@ terraform {
     region = "ap-south-1"
   }
 }
+data "aws_route53_zone" "main" {
+  name = var.domain_name
+}
 module "vpc" {
   source    = "./modules/vpc"
   vpc_cidr  = var.vpc_cidr
