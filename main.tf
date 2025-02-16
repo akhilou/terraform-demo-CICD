@@ -10,7 +10,6 @@ terraform {
   }
 }
 
-
 data "aws_route53_zone" "main" {
   name = var.domain_name
 }
@@ -21,13 +20,13 @@ module "vpc" {
 }
 
 module "subnets" {
-  source          = "./modules/subnets"
-  vpc_id          = module.vpc.vpc_id
-  route_table_id  = module.vpc.route_table_id
-  subnet_cidr1    = var.subnet_cidr1
-  subnet_cidr2    = var.subnet_cidr2
-  availability_zone1 = "ap-south-1a"
-  availability_zone2 = "ap-south-1b"
+  source              = "./modules/subnets"
+  vpc_id              = module.vpc.vpc_id
+  route_table_id      = module.vpc.route_table_id
+  subnet_cidr1        = var.subnet_cidr1
+  subnet_cidr2        = var.subnet_cidr2
+  availability_zone1  = "ap-south-1a"
+  availability_zone2  = "ap-south-1b"
 }
 
 module "security_groups" {
