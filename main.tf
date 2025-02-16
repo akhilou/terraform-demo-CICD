@@ -49,6 +49,7 @@ module "alb" {
   subnet2_id      = module.subnets.subnet2_id
   alb_sg_id       = module.security_groups.web_sg_id
   certificate_arn = var.certificate_arn
+  instance_id     = module.ec2.instance_id
 }
 
 module "route53" {
