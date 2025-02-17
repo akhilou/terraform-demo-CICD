@@ -18,10 +18,6 @@ variable "alb_sg_id" {
   type        = string
 }
 
-variable "certificate_arn" {
-  description = "The ARN of the ACM certificate for HTTPS listener"
-  type        = string
-}
 variable "instance_id" {
   description = "The ID of the EC2 instance"
   type        = string
