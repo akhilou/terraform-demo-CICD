@@ -18,18 +18,3 @@ variable "ami" {
   default = "ami-00bb6a80f01f03502"
 }
 
-variable "domain_name" {
-  description = "cloudwithsunil.xyz"
-  default     = "cloudwithsunil.xyz"
-}
-
-variable "subdomain_name" {
-  description = "www.cloudwithsunil.xyz"
-  default     = "www.cloudwithsunil.xyz"
-}
-
-variable "certificate_arn" {
-  description = "ARN of the ACM certificate for HTTPS listener"
-  default     = "arn:aws:acm:ap-south-1:007903962438:certificate/cc05b44c-fd8c-4a34-ab2f-8ff966dccac4"
-}
-
