@@ -6,7 +6,7 @@ terraform {
   backend "s3" {
     bucket = "myaws-bucket-terraform-state-file"
     key    = "terraform-state-file/statefile"
-    region = "ap-south-1"
+    region = "us-east-1"
   }
 }
 module "vpc" {
