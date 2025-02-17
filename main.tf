@@ -9,11 +9,6 @@ terraform {
     region = "ap-south-1"
   }
 }
-
-data "aws_route53_zone" "main" {
-  name = var.domain_name
-}
-
 module "vpc" {
   source    = "./modules/vpc"
   vpc_cidr  = var.vpc_cidr
@@ -48,14 +43,5 @@ module "alb" {
   subnet1_id      = module.subnets.subnet1_id
   subnet2_id      = module.subnets.subnet2_id
   alb_sg_id       = module.security_groups.web_sg_id
-  certificate_arn = var.certificate_arn
   instance_id     = module.ec2.instance_id
-}
-
-module "route53" {
-  source              = "./modules/route53"
-  domain_name         = var.domain_name
-  subdomain_name      = var.subdomain_name
-  alb_dns_name        = module.alb.alb_dns_name
-  alb_hosted_zone_id  = module.alb.alb_hosted_zone_id
 }
