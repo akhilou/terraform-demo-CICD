@@ -4,7 +4,39 @@ on:
   workflow_dispatch:
 
 jobs:
+  setup-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: latest
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Initialize Terraform for Backend
+        run: terraform init
+        working-directory: ./setup-backend
+
+      - name: get plan Terraform for Backend
+        run: terraform plan
+        working-directory: ./setup-backend
+
+      - name: Apply Terraform to create Backend
+        run: terraform apply -auto-approve
+        working-directory: ./setup-backend
+
   terraform:
+    needs: setup-backend
     runs-on: ubuntu-latest
 
     steps:
