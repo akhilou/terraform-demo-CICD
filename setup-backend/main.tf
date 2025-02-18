@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "this" {
   bucket = "my-terraform-state-bucket"
-  aws_s3_bucket_acl    = "public"
+  acl    = "public"
 
   tags = {
     Name = "my-terraform-state-bucket"
