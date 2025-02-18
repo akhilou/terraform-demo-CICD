@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "this" {
-  bucket = "my-terraform-state-bucket"
+  bucket = "my-terraform-state-bucket-for-statefile"
   acl    = "private"
 
   tags = {
