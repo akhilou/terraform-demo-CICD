@@ -33,15 +33,16 @@ jobs:
 
       - name: Export S3 Bucket Name
         run: |
-          # Debug: Print the raw output from Terraform
+          # Debug: Print the raw output from Terraform to understand what's returned
           echo "Raw Terraform Output:"
           terraform output -raw bucket_name
-    
-          # Capture and export the bucket name into the environment
-          S3_BUCKET_NAME=$(terraform output -raw bucket_name)
+
+          # Capture and export the bucket name, ensuring clean output without extra debug info
+          S3_BUCKET_NAME=$(terraform output -raw bucket_name | sed 's/::debug::.*//')
           echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_ENV
         working-directory: ./setup-backend
         shell: bash
+
 
   terraform:
     needs: setup-backend
