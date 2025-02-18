@@ -5,6 +5,7 @@ provider "aws" {
 resource "random_string" "unique" {
   length  = 8
   special = false
+  upper   = false
 }
 
 resource "aws_s3_bucket" "this" {
@@ -22,6 +23,12 @@ resource "aws_s3_bucket_versioning" "this" {
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+resource "aws_s3_object" "folder" {
+  bucket = aws_s3_bucket.this.bucket
+  key    = "terraform-state-file/"
+  content = ""
 }
 
 output "bucket_name" {
