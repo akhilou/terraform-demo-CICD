@@ -1,6 +1,13 @@
 provider "aws" {
   region = "ap-south-1"
 }
+terraform {
+  backend "s3" {
+    bucket = "my-terraform-state-bucket-${random_string.unique.result}"  # Same as the created bucket
+    key    = "terraform-state-file/terraform.tfstate"  # Specify the state file location
+    region = "us-west-2"
+  }
+}
 
 module "vpc" {
   source    = "./modules/vpc"
