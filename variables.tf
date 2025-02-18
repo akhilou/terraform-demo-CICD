@@ -18,3 +18,4 @@ variable "ami" {
   default = "ami-00bb6a80f01f03502"
 }
 
+s3_bucket_name = "my-terraform-s3-bucket"
