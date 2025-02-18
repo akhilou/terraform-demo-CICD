@@ -21,7 +21,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
+          aws-region: ap-south-1
 
       - name: Initialize Terraform for Backend
         run: terraform init
@@ -32,7 +32,9 @@ jobs:
         working-directory: ./setup-backend
 
       - name: Export S3 Bucket Name
-        run: echo "S3_BUCKET_NAME=$(terraform output -raw bucket_name)" >> $GITHUB_ENV
+        run: |
+          terraform output -raw bucket_name > bucket_name.txt
+          echo "S3_BUCKET_NAME=$(cat bucket_name.txt)" >> $GITHUB_ENV
         working-directory: ./setup-backend
 
   terraform:
