@@ -2,19 +2,14 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-module "s3" {
-  source          = "./modules/s3"
-  bucket_name     = var.s3_bucket_name
-  region          = var.region
-}
-
 terraform {
   backend "s3" {
-    bucket = module.s3.bucket_name
+    bucket = "my-terraform-state-bucket"
     key    = "terraform-state-file/statefile"
-    region = var.region
+    region = "us-east-1"
   }
 }
+
 module "vpc" {
   source    = "./modules/vpc"
   vpc_cidr  = var.vpc_cidr
