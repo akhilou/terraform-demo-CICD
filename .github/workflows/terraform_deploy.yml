@@ -21,18 +21,18 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+          aws-region: us-west-2
 
       - name: Initialize Terraform for Backend
         run: terraform init
         working-directory: ./setup-backend
 
-      - name: get plan Terraform for Backend
-        run: terraform plan
-        working-directory: ./setup-backend
-
       - name: Apply Terraform to create Backend
         run: terraform apply -auto-approve
+        working-directory: ./setup-backend
+
+      - name: Export S3 Bucket Name
+        run: echo "S3_BUCKET_NAME=$(terraform output -raw bucket_name)" >> $GITHUB_ENV
         working-directory: ./setup-backend
 
   terraform:
@@ -55,12 +55,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Initialize Terraform with Backend Configuration
+        env:
+          S3_BUCKET_NAME: ${{ env.S3_BUCKET_NAME }}
+        run: terraform init -backend-config="bucket=${{ env.S3_BUCKET_NAME }}" -backend-config="key=terraform-state-file/statefile" -backend-config="region=us-west-2"
+        working-directory: ./main
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: ./main
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
+        working-directory: ./main
