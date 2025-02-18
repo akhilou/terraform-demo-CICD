@@ -2,14 +2,6 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-terraform {
-  backend "s3" {
-    bucket = "my-terraform-state-bucket-for-statefile"
-    key    = "terraform-state-file/statefile"
-    region = "us-east-1"
-  }
-}
-
 module "vpc" {
   source    = "./modules/vpc"
   vpc_cidr  = var.vpc_cidr
