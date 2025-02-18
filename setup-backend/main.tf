@@ -1,10 +1,10 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "ap-south-1"
 }
 
 resource "aws_s3_bucket" "this" {
   bucket = "my-terraform-state-bucket"
-  acl    = "private"
+  aws_s3_bucket_acl    = "public"
 
   tags = {
     Name = "my-terraform-state-bucket"
